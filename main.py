@@ -1,13 +1,14 @@
-""" 
-Задана рекуррентная функция. 
-Область определения функции – натуральные числа. Написать программу сравнительного вычисления данной функции рекурсивно и итерационно. 
-Определить границы применимости рекурсивного и итерационного подхода. 
-Результаты сравнительного исследования времени вычисления представить в табличной и графической форме в виде отчета по лабораторной работе.
-Вариант №20: 
-F(1) = 1; G(1) = 1; F(n) = (-1)n*(F(n–1) – 2*G(n–1))/(2n)!
-G(n) = F(n–1) + G(n–1), при n >=2 
 """
-import time
+Задана рекуррентная функция.
+Область определения функции – натуральные числа. Написать программу сравнительного вычисления данной функции рекурсивно и итерационно.
+Определить границы применимости рекурсивного и итерационного подхода.
+Результаты сравнительного исследования времени вычисления представить в табличной и графической форме в виде отчета по лабораторной работе.
+Вариант №20:
+F(1) = 1; G(1) = 1; F(n) = (-1)n*(F(n–1) – 2*G(n–1))/(2n)!
+G(n) = F(n–1) + G(n–1), при n >=2
+"""
+
+import timeit
 import matplotlib.pyplot as plt
 from functools import lru_cache
 
@@ -19,17 +20,15 @@ fact = [1] * 2
 
 one = -1
 
-lru_cache(maxsize=None)
-def itfact(x):
-    global fact
-    if fact[1] < x:
-        for i in range(fact[1]+1, x+1):
-            fact[0] = fact[0] * i
-    elif fact[1] > x:
-        for i in range(x+1, fact[1]+1):
-            fact[0] = fact[0] // i
-    fact[1] = x
-    return fact[0]
+_cache = [1]  # _cache[i] = i!
+def itfact(n):
+    if n < len(_cache):
+        return _cache[n]
+    res = _cache[-1]
+    for i in range(len(_cache), n+1):
+        res *= i
+        _cache.append(res)
+    return _cache[n]
 
 
 #рекурсия
@@ -79,21 +78,19 @@ while n < 1:
 graf = list(range(1, n+1))
 
 for i in graf:
-    start = time.time()
     one = -1 if i % 2 == 0 else 1
     result = it_f(i)
-    end = time.time()
-    timer.append(end-start)
-    start_rec = time.time()
+    t = timeit.timeit(lambda: it_f(i), number=1)
+    timer.append(t)
     one = -1
     res = rec_f(i)
-    end_rec = time.time()
-    timer_rec.append(end_rec-start_rec)
+    t_rec = timeit.timeit(lambda: rec_f(i), number=1)
+    timer_rec.append(t_rec)
     print(i,
           " | Результат рекурсии ->", res,
           " | результат итерации ->", result,
-          " | время  рекурсии ->", end_rec-start_rec,
-          " | время  итерации ->",end-start)
+          " | время  рекурсии ->", t_rec,
+          " | время  итерации ->", t)
 
 plt.plot(graf, timer, label='Итерационная функция.')
 plt.plot(graf, timer_rec, label='Рекусионная функция.')
